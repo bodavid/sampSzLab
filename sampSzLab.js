@@ -1,5 +1,8 @@
 /**
- * Visualizing sample sizes dependency on even Fourier transforms with noise
+ * Visualizing sample sizes dependency on even Fourier transforms with noise.
+ *
+ * Basis function periodicity can be 2*pi or rational. Rational might seem easier but has the disadvantage of being
+ * specific on borders on a computer architecture. Basis functions can be unspecified in and around discontinuities.
  */
 
 var SampSzLab = function() {
@@ -25,6 +28,7 @@ var SampSzLab = function() {
   // make a basis vector, based on func
   // func must have period 2pi
   this.frequencyBasis = function(func, normed) {
+       if(typeof(func)==='undefined') func = Math.cos;
        if(typeof(normed)==='undefined') normed = true;
 
   }
