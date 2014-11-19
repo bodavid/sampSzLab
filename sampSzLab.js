@@ -5,37 +5,65 @@
  * specific on borders on a computer architecture. Basis functions can be unspecified in and around discontinuities.
  */
 
-var SampSzLab = function() {
+var SampSzLab = function(defaults) {
 
   "use strict";
 
   var cryptoObj = window.crypto || window.msCrypto;
 
-  this.boxMuller = function(func, stdDev, n) {
-    if (!n) {
-      n = 1;
-    } 
+  this.basisFunc = Math.cos;
+  this.normedBasis = true;
+  this.basisMatrix = null;
+  this.sampSz = 1007;
+  this.period = 2 * Math.PI;
+  this.interval = 2 * Math.PI;
+
+  this.boxMuller = function(n, func, stdDev) {
+    if (typeof n === 'undefined') n = 1;
+    if (typeof func === 'undefined') func = function(){return 1};
+    if (typeof stdDev === 'undefined') stdDev = 1;
+
     var arr = new Uint32Array(4*n);
     cryptoObj.getRandomValues(arr);
     var i = 0, j = 0, rnd;
-    var normDist = Float64Array(n);
+    var normDist = new Float64Array(n);
     while (i < n - 1)  {
-      normDist[j++] = mean + stdDev * (Math.sqrt(-2 * Math.log((arr[i++]/4294967296 + arr[i++])/18446744073709551616)) * Math.cos(2 * Math.PI * (arr[i++]/4294967296 + arr[i++])/18446744073709551616));
+      normDist[j++] = func(j-1) + stdDev * (Math.sqrt(-2 * Math.log((arr[i++]/4294967296 + arr[i++])/18446744073709551616)) * Math.cos(2 * Math.PI * (arr[i++]/4294967296 + arr[i++])/18446744073709551616));
     }
     return normDist;
   }
 
   // make a basis vector, based on func
   // func must have period 2pi
-  this.frequencyBasis = function(func, normed) {
-       if(typeof(func)==='undefined') func = Math.cos;
-       if(typeof(normed)==='undefined') normed = true;
-
+  this.frequencyBasis = function() {
+//    var freqVec = new Float64Array(this.sampSz);
+    var freqVec = new Array(this.sampSz);
+    var dx = this.interval / this.sampSz;
+    var l2sum = 0;
+    for (var i=0; i < this.sampSz; i++) {
+      freqVec[i] = this.basisFunc( dx * i);
+      l2sum += freqVec[i] * freqVec[i];
+    }
+    if (this.normedBasis) {
+        var l2lengthInv = 1 / Math.sqrt(l2sum);
+        for (var i=0; i < this.sampSz; i++) {
+          freqVec[i] = l2lengthInv * freqVec[i];
+        }
+    }
+//    this.freqVec = freqVec;
+    return freqVec;
   }
 
   //make a basis matrix
-  this.makeBasisSpectrum = function(dimensions){
+  this.makeBasisSpectrumMatrix = function(dimensions){
+    var basisSpectrumMatrix = new Array(this.sampSz);
 
+    for (var i=0; i < this.sampSz; i++) {
+      this.interval = this.period * i;
+      basisSpectrumMatrix[i] = this.frequencyBasis();
+    }
+    this.BasisSpectrumMatrix = BasisSpectrumMatrix;
+    return BasisSpectrumMatrix;
   }
 
   this.makeSpectrum = function() {
