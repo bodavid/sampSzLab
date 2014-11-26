@@ -23,13 +23,17 @@ var SampSzLab = function(defaults) {
     if (typeof func === 'undefined') func = function(){return 1};
     if (typeof stdDev === 'undefined') stdDev = 1;
 
-    var arr = new Uint32Array(4*n);
+    var arr = new Uint32Array(3*n + 3);
     cryptoObj.getRandomValues(arr);
-    var i = 0, j = 0, rnd;
-    var normDist = new Float64Array(n);
-    while (i < n - 1)  {
-      normDist[j++] = func(j-1) + stdDev * (Math.sqrt(-2 * Math.log((arr[i++]/4294967296 + arr[i++])/18446744073709551616)) * Math.cos(2 * Math.PI * (arr[i++]/4294967296 + arr[i++])/18446744073709551616));
+    var i = 0, j = 0, rndR;
+    var normDist = new Float64Array(n+1);
+    while (j < n - 1)  {
+//      normDist[j++] = func(j-1) + stdDev * (Math.sqrt(-2 * Math.log((arr[i++]/4294967296 + arr[i++])/18446744073709551616)) * Math.cos(2 * Math.PI * (arr[i++]/4294967296 + arr[i++])/18446744073709551616));
+      rndR = -2 * Math.log((arr[i++]/4294967296 + arr[i++])/18446744073709551616))
+      normDist[j++] =  func(j-1) + stdDev * (Math.sqrt(rndR * Math.sin(2 * Math.PI * (arr[i++]/4294967296 + arr[i++])/18446744073709551616));
+      normDist[j++] =  func(j-1) + stdDev * (Math.sqrt(rndR * Math.cos(2 * Math.PI * (arr[i++]/4294967296 + arr[i++])/18446744073709551616));
     }
+    normDist.length = n;
     return normDist;
   }
 
