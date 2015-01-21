@@ -3,19 +3,34 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fourier Transformations tests</title>
 </head>
 <body>
 
+<h2>
+    Tests of statistical features of Fourier transformations
+</h2>
 
-<div class="barGraph">
-    <div style="height: 22px;" class="bar"></div><!--
+<h3>Summary</h3>
+This page shows how expected values and variances changes in Fourier transformations. This is useful in determining how SNR and SINAD changes. SNR is usually improved at the expense of specificity of location. SNR is dependent on the sampling set. The relation is usually that SNR improves
+with the square root of the sampling set size. Somewhat lower than expected SNR exists for n-radix intervals for lower n due to zero elements in the basis vectors.
+
+<h3>
+    Derivation
+</h3>
+The result of straightforward arithmetics on expected value and variance.
+<h3>
+    Simulations
+</h3>
+
+<div class="barGraph" style="display: none;">
+    <div style="    height: 22px;" class="bar"></div><!--
         --><div style="height: 11px;" class="bar"></div><!--
         --><div style="height: 6px;" class="bar"></div><!--
         --><div style="height: 49px;" class="bar"></div><!--
         --><div style="height: 278px;" class="bar"></div>
 </div>
-<div>
+<div style="display: none;">
     <div>
         <hr>
         D3 svg
@@ -26,14 +41,17 @@
 <div>
     <div>
         <hr>
-        D3/Chart Canvas
+        <span style="display: none;">D3/Chart Canvas</span>
     </div>
     <canvas id="chCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
 </div>
 
 <hr>
-Google charts
-<div id="barchart_material" style="width: 900px; height: 500px;"></div>
+
+<div style="display: none;">
+    <span>Google charts</span>
+    <div id="barchart_material" style="width: 900px; height: 500px;"></div>
+</div>
 
 </body>
 
@@ -96,7 +114,7 @@ Google charts
     var exports = {};
 </script>
 
-<script src="sampSzLab.js"></script>
+<script src="sampSzLab.js"> </script>
 
 <script>
   var myLab = new SampSzLab();
@@ -110,7 +128,7 @@ Google charts
 
 // Drawing bar charts
 
-  myLab.sampSz = 77;
+  myLab.sampSz = 16;
   var cosV =  myLab.frequencyBasis();
   myLab.basisFunc = Math.sin;
   var sinV = myLab.frequencyBasis();
@@ -211,12 +229,13 @@ Google charts
 
 // D3 grouped charts
 
-var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, d)}; });
+//var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, d)}; });
+var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, 0.5)}; });
 
 var n = 4, // number of layers
     m = myLab.sampSz, // number of samples per layer
     stack = d3.layout.stack(),
-//    layers = stack(d3.range(n).map(function() { return bumpLayer(m, .1); })),
+//      layers = stack(d3.range(n).map(function() { return bumpLayer(m, .1); })),
     layers = stack(chD3V),
     yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
     yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
