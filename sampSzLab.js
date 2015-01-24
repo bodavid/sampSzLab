@@ -23,6 +23,7 @@ var SampSzLab = function(defaults) {
   this.sampSz = 1007;
   this.period = 2 * Math.PI;
   this.interval = 2 * Math.PI;
+  this.multiplier = 1;
 
   this.rndBMt = function() {
     // Based on  http://www.protonfish.com/jslib/boxmuller.shtml
@@ -73,7 +74,7 @@ var SampSzLab = function(defaults) {
     var dx = this.interval / this.sampSz;
     var l2sum = 0;
     for (var i=0; i < this.sampSz; i++) {
-      freqVec[i] = this.basisFunc( dx * i);
+      freqVec[i] = this.basisFunc( this.multiplier * dx * i);
       l2sum += freqVec[i] * freqVec[i];
     }
     if (this.normedBasis) {

@@ -38,13 +38,22 @@ The result of straightforward arithmetics on expected value and variance.
     <svg id="visualisation" width="1000" height="500"></svg>
 </div>
 
-<div>
+<div style="display: none;">
     <div>
         <hr>
-        <span style="display: none;">D3/Chart Canvas</span>
+        <span>D3/Chart SVG</span>
     </div>
     <canvas id="chCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
 </div>
+
+<div>
+    <div>
+        <hr>
+        <span style="display: block;">D3/Simple Chart DIV</span>
+    </div>
+    <div id="d3SimpleCanvas" width="1000" height="1000" style="border:1px solid #000000;"></div>
+</div>
+
 
 <hr>
 
@@ -57,13 +66,14 @@ The result of straightforward arithmetics on expected value and variance.
 
 <style>
   .graph {
-//        width: 50px;
-//        height: 50px;
+/*        width: 50px;
+        height: 50px;
+*/
       border: 1px solid #aeaeae;
       background-color: #eaeaea;
   }
   .bar {
-      //width: 8px;
+      /*width: 8px; */
       width: 10%;
       margin: 1px;
       display: inline-block;
@@ -97,6 +107,15 @@ The result of straightforward arithmetics on expected value and variance.
     top: 10px;
   }
 
+    /* Simple bar chart */
+    .barSimp {
+        background-color: #aeaeae;
+        display: inline-block;
+/*        border: 0.5px solid black;
+*/        vertical-align: baseline;
+    }
+
+
 </style>
 
 <!--<link rel="stylesheet" href="//cdn.jsdelivr.net/jqplot/1.0.8/jquery.jqplot.css">-->
@@ -106,7 +125,8 @@ The result of straightforward arithmetics on expected value and variance.
 <script src="http://cdnjs.cloudflare.com/ajax/libs/mathjs/1.0.1/math.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.1/jsxgraphcore.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.js"></script>
+<!-- script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.js"></script -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="https://www.google.com/jsapi"></script>
 <!--<script src="//cdn.jsdelivr.net/jqplot/1.0.8/jquery.jqplot.js"></script>-->
 
@@ -128,7 +148,8 @@ The result of straightforward arithmetics on expected value and variance.
 
 // Drawing bar charts
 
-  myLab.sampSz = 16;
+  myLab.sampSz = 64;
+  myLab.multiplier = 1;
   var cosV =  myLab.frequencyBasis();
   myLab.basisFunc = Math.sin;
   var sinV = myLab.frequencyBasis();
@@ -202,6 +223,7 @@ The result of straightforward arithmetics on expected value and variance.
   var chCtx = document.getElementById('chCanvas').getContext("2d");
   var chChart = new Chart(chCtx).Bar(chData, chOptions);
 
+/*
   //Google charts
       google.load("visualization", "1.1", {packages:["bar"]});
       google.setOnLoadCallback(drawChart);
@@ -226,9 +248,11 @@ The result of straightforward arithmetics on expected value and variance.
 
         chart.draw(data, options);
       }
+*/
+
 
 // D3 grouped charts
-
+/*
 //var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, d)}; });
 var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, 0.5)}; });
 
@@ -291,6 +315,33 @@ svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
+*/
+
+// Simple D3
+
+//var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+//                11, 12, 15, 20, 18, 17, 16, 18, 23, 55 ];
+
+var dataset = cosV.map(function(d, i) {
+        return d*d;
+    }
+);
+
+
+d3.select("body").selectAll("d3SimpleCanvas")
+    .data(dataset)
+    .enter()
+    .append("div")
+    .attr("class", "barSimp")
+    .style("height", function(d) {
+        var barHeight = Math.round(d * 5000);
+        return barHeight + "px";
+    })
+/*    .style("width", function(d) {
+        return "auto";
+        return 100/myLab.sampSz + "%";
+    })*/;
+
 
 </script>
 
