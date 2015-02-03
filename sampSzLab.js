@@ -102,5 +102,97 @@ var SampSzLab = function(defaults) {
 
   }
 
+/** SteepTrans is a library for analysing rapidly changing processes in noisy environments.
+ *  It is designed to be able to optimize due to many zeros and many shared values in common in the basis functions.
+ *
+ *  Readability of the code has had higher priority than optimization. The code would need optimization for larger sample sizes.
+ *
+ *  You better know what you are doing when using this lib otherwise you will get inconclusive results and unknown precision.
+ *
+ *  The SteepTrans library is made as an experiment by David Jonsson 2014.
+ */
+
+ this.SteepTrans = function(defaults) {
+
+   /** Default parameters */
+   var defaults = defaults || {},
+   sampleSize = defaults.sampleSize || 10007,
+   dimensions = defaults.dimensions || 23,
+   periodicity = defaults.periodicity || 2 * Math.PI;
+   func = defaults.func || null;
+   basisFunction = defaults.basisFunction || null;
+
+   var stThis = this;
+
+/** The steep(x) function is periodic and looks like
+ *
+ *  __
+ * _  __  _
+ *      __
+ *
+ * over one periodic (2*pi). It is 0, 1 or -1. Using a transcendental number as periodic lowers the risks of aliasing and
+ * keeps some features of the sine function.
+ */
+
+  prototype.steep = function(t) {
+    var tmod = (t / periodicity) % 1;
+     if (tmod < 1/8)
+       return 0
+     else if (tmod < 3/8)
+       return 1
+     else if (tmod < 5/8)
+       return 0
+     else if (tmod < 7/8)
+       return -1
+     else return 0;
+   }
+
+  /** The dotProduct between two functions can be used as a way to evaluate the orthogonality of two
+  *  functions.
+  */
+  prototype.dotProduct = function(func, basisFunction, dimensions) {
+    if (!(func) {
+      func = stThis.steep;
+    }
+    if (!(basisFunction) {
+      basisFunction = stThis.steep;
+    }
+    if (!(dimensions) {
+      dimensions = defaultDimensions;
+    }
+
+    var product = Array[dimensions];
+    var prod = 0;
+    var dt = periodicity / sampleSize;
+
+    for (var dim = 1; dim =< dimensions; dim++) {
+      for (var samp = 0.5; samp < sampleSize; samp++) {
+       prod += func(samp * dt) * basisFunction(dim * samp * dt);
+      }
+      product[dim - 1] = prod;
+    }
+
+    return product;
+  }
+
+  /** The magnitude of a function is the length, size or norm of the function in the sense of functional analysis or
+   *  linear algebra.
+   */
+ prototype.magnitude = function() {
+  return Math.sqrt((this.dotProduct(null, null, 1))[0]);
+ }
+
+  /** The test object can be used as unit testing and as a way to evaluate the
+   *  functions on various platforms, settings and biases.
+   */
+  prototype.tests = {
+   orthogonality: function() {
+    return stThis.dotProduct()
+  }
+
+ }
+
+}
+
 }
 
