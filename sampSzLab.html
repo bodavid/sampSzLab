@@ -121,12 +121,12 @@ The result of straightforward arithmetics on expected value and variance.
 <!--<link rel="stylesheet" href="//cdn.jsdelivr.net/jqplot/1.0.8/jquery.jqplot.css">-->
 
 <script src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.4.0/MathJax.js"></script>
-<script src="http://cdn.rawgit.com/nnnick/Chart.js/master/Chart.js"></script>
+<!--<script src="http://cdn.rawgit.com/nnnick/Chart.js/master/Chart.js"></script>-->
 <script src="http://cdnjs.cloudflare.com/ajax/libs/mathjs/1.0.1/math.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.1/jsxgraphcore.js"></script>
 <!-- script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.js"></script -->
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<!--<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>-->
 <script src="https://www.google.com/jsapi"></script>
 <!--<script src="//cdn.jsdelivr.net/jqplot/1.0.8/jquery.jqplot.js"></script>-->
 
@@ -221,7 +221,7 @@ The result of straightforward arithmetics on expected value and variance.
 }
 
   var chCtx = document.getElementById('chCanvas').getContext("2d");
-  var chChart = new Chart(chCtx).Bar(chData, chOptions);
+//  var chChart = new Chart(chCtx).Bar(chData, chOptions);
 
 /*
   //Google charts
@@ -327,7 +327,7 @@ var dataset = cosV.map(function(d, i) {
     }
 );
 
-
+/*
 d3.select("body").selectAll("d3SimpleCanvas")
     .data(dataset)
     .enter()
@@ -337,6 +337,8 @@ d3.select("body").selectAll("d3SimpleCanvas")
         var barHeight = Math.round(d * 5000);
         return barHeight + "px";
     })
+    */
+
 /*    .style("width", function(d) {
         return "auto";
         return 100/myLab.sampSz + "%";

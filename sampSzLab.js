@@ -8,22 +8,28 @@
 var SampSzLab = function(defaults) {
 
 //  "use strict";
+  var szThis = this;
 
   var cryptoObj = window.crypto || window.msCrypto;
 
+  /** Default parameters */
+  var defaults = defaults || {};
+  this.sampleSize = defaults.sampleSize || 10007;
+  this.dimensions = defaults.dimensions || 23;
+  this.func = defaults.func || null;
+  this.basisFunction = defaults.basisFunction || Math.cos;
+  this.interval = defaults.interval || 2 * Math.PI;
+  this.normedBasis = defaults.normedBasis || true;
+  this.basisMatrix = defaults.basisMatrix || null;
+  this.period = defaults.period || 2 * Math.PI;
+  this.multiplier = defaults.multiplier || 1;
+
+  //Somewhat stronger or more uniform than Math.random()
   this.random = function() {
     var arr = new Uint32Array(2);
     cryptoObj.getRandomValues(arr);
     return arr[0]/4294967296 + arr[1]/18446744073709551616;
   }
-
-  this.basisFunc = Math.cos;
-  this.normedBasis = true;
-  this.basisMatrix = null;
-  this.sampSz = 1007;
-  this.period = 2 * Math.PI;
-  this.interval = 2 * Math.PI;
-  this.multiplier = 1;
 
   this.rndBMt = function() {
     // Based on  http://www.protonfish.com/jslib/boxmuller.shtml
@@ -48,6 +54,7 @@ var SampSzLab = function(defaults) {
       return [x*c, y*c];
   }
 
+  //defunct
   this.boxMuller = function(retArr, func, stdDev) {
     if (typeof n === 'undefined') n = retArr.length;
     if (typeof func === 'undefined') func = function(x){return 0};
@@ -69,17 +76,17 @@ var SampSzLab = function(defaults) {
 
   // make a basis vector, based on func
   this.frequencyBasis = function() {
-//    var freqVec = new Float64Array(this.sampSz);
-    var freqVec = new Array(this.sampSz);
-    var dx = this.interval / this.sampSz;
+//    var freqVec = new Float64Array(this.sampleSize);
+    var freqVec = new Array(this.sampleSize);
+    var dx = this.interval / this.sampleSize;
     var l2sum = 0;
-    for (var i=0; i < this.sampSz; i++) {
-      freqVec[i] = this.basisFunc( this.multiplier * dx * i);
+    for (var i=0; i < this.sampleSize; i++) {
+      freqVec[i] = this.basisFunction( this.multiplier * dx * i);
       l2sum += freqVec[i] * freqVec[i];
     }
     if (this.normedBasis) {
         var l2lengthInv = 1 / Math.sqrt(l2sum);
-        for (var i=0; i < this.sampSz; i++) {
+        for (var i=0; i < this.sampleSize; i++) {
           freqVec[i] = l2lengthInv * freqVec[i];
         }
     }
@@ -89,9 +96,9 @@ var SampSzLab = function(defaults) {
 
   //make a basis matrix
   this.makeBasisSpectrumMatrix = function(dimensions){
-    var basisSpectrumMatrix = new Array(this.sampSz);
+    var basisSpectrumMatrix = new Array(this.sampleSize);
 
-    for (var i=0; i < this.sampSz; i++) {
+    for (var i=0; i < this.sampleSize; i++) {
       this.interval = this.period * i;
       basisSpectrumMatrix[i] = this.frequencyBasis();
     }
@@ -103,97 +110,102 @@ var SampSzLab = function(defaults) {
 
   }
 
-/** SteepTrans is a library for analysing rapidly changing processes in noisy environments.
- *  It is designed to be able to optimize due to many zeros and many shared values in common in the basis functions.
- *
- *  Readability of the code has had higher priority than optimization. The code would need optimization for larger sample sizes.
- *
- *  You better know what you are doing when using this lib otherwise you will get inconclusive results and unknown precision.
- *
- *  The SteepTrans library is made as an experiment by David Jonsson 2014.
- */
+  /** SteepTrans is a library for analysing rapidly changing processes in noisy environments.
+   *  It is designed to be able to optimize due to many zeros and many shared values in common in the basis functions.
+   *
+   *  Readability of the code has had higher priority than optimization. The code would need optimization for larger sample sizes.
+   *
+   *  You better know what you are doing when using this lib otherwise you will get inconclusive results and unknown precision.
+   *
+   *  The SteepTrans library is made as an experiment by David Jonsson 2014.
+   */
 
- this.SteepTrans = function(defaults) {
+  /** The sinSteep(x) function is periodic and looks like
+   *
+   *  __
+   * _  __  _
+   *      __
+   *
+   * over one periodic (2*pi). It is 0, 1 or -1. Using a transcendental number as periodic lowers the risks of aliasing and
+   * keeps some features of the sine function.
+   */
 
-   /** Default parameters */
-   var defaults = defaults || {},
-   sampleSize = defaults.sampleSize || 10007,
-   dimensions = defaults.dimensions || 23,
-   periodicity = defaults.periodicity || 2 * Math.PI;
-   func = defaults.func || null;
-   basisFunction = defaults.basisFunction || null;
-
-   var stThis = this;
-
-/** The steep(x) function is periodic and looks like
- *
- *  __
- * _  __  _
- *      __
- *
- * over one periodic (2*pi). It is 0, 1 or -1. Using a transcendental number as periodic lowers the risks of aliasing and
- * keeps some features of the sine function.
- */
-
-  prototype.steep = function(t) {
-    var tmod = (t / periodicity) % 1;
-     if (tmod < 1/8)
+    this.sinSteep = function(t) {
+      var tmod = (t / this.period) % 1;
+      if (tmod < 1/8)
        return 0
-     else if (tmod < 3/8)
-       return 1
-     else if (tmod < 5/8)
+      else if (tmod < 3/8)
+       return Math.sign(tmod)
+      else if (tmod < 5/8)
        return 0
-     else if (tmod < 7/8)
-       return -1
-     else return 0;
-   }
+      else if (tmod < 7/8)
+       return -Math.sign(tmod)
+      else return 0;
+     }
 
-  /** The dotProduct between two functions can be used as a way to evaluate the orthogonality of two
-  *  functions.
-  */
-  prototype.dotProduct = function(func, basisFunction, dimensions) {
-    if (!(func) {
-      func = stThis.steep;
-    }
-    if (!(basisFunction) {
-      basisFunction = stThis.steep;
-    }
-    if (!(dimensions) {
-      dimensions = defaultDimensions;
-    }
+  /** The cosSteep(x) function is periodic and looks like
+   *
+   * _      _
+   *  __  __
+   *    __
+   *
+   * over one periodic (2*pi). It is 1, 0 or -1. Using a transcendental number as periodic lowers the risks of aliasing and
+   * keeps some features of the cos function.
+   */
 
-    var product = Array[dimensions];
-    var prod = 0;
-    var dt = periodicity / sampleSize;
+    this.cosSteep = function(t) {
+      var tmod = Math.abs(((t / this.period) % 1) - 1/2 );
+      if (tmod < 1/8)
+        return -1
+      else if (tmod >= 3/8)
+        return 1
+      return 0;
+     }
 
-    for (var dim = 1; dim =< dimensions; dim++) {
-      for (var samp = 0.5; samp < sampleSize; samp++) {
-       prod += func(samp * dt) * basisFunction(dim * samp * dt);
+    /** The dotProduct between two functions can be used as a way to evaluate the orthogonality of two
+    *  functions.
+    */
+    this.dotProduct = function(func, basisFunction, dimensions) {
+      if (!(func)) {
+        func = szThis.steep;
       }
-      product[dim - 1] = prod;
+      if (!(basisFunction)) {
+        basisFunction = szThis.cosSteep;
+      }
+      if (!(dimensions)) {
+        dimensions = defaultDimensions;
+      }
+
+      var product = Array[dimensions];
+      var prod = 0;
+      var dt = this.period / sampleSize;
+
+      for (var dim = 1; dim <= dimensions; dim++) {
+        for (var samp = 0.5; samp < sampleSize; samp++) {
+         prod += func(samp * dt) * basisFunction(dim * samp * dt);
+        }
+        product[dim - 1] = prod;
+      }
+
+      return product;
     }
 
-    return product;
-  }
+    /** The magnitude of a function is the length, size or norm of the function in the sense of functional analysis or
+     *  linear algebra.
+     */
+    this.magnitude = function() {
+      return Math.sqrt((this.dotProduct(null, null, 1))[0]);
+    }
 
-  /** The magnitude of a function is the length, size or norm of the function in the sense of functional analysis or
-   *  linear algebra.
-   */
- prototype.magnitude = function() {
-  return Math.sqrt((this.dotProduct(null, null, 1))[0]);
- }
+    /** The test object can be used as unit testing and as a way to evaluate the
+     *  functions on various platforms, settings and biases.
+     */
+    this.tests = {
+      orthogonality: function() {
+        return szThis.dotProduct()
+      }
 
-  /** The test object can be used as unit testing and as a way to evaluate the
-   *  functions on various platforms, settings and biases.
-   */
-  prototype.tests = {
-   orthogonality: function() {
-    return stThis.dotProduct()
-  }
-
- }
-
-}
+    }
 
 }
 
