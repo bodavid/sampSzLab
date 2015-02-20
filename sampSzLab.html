@@ -13,7 +13,7 @@
 
 <h3>Summary</h3>
 This page shows how expected values and variances changes in Fourier transformations. This is useful in determining how SNR and SINAD changes. SNR is usually improved at the expense of specificity of location. SNR is dependent on the sampling set. The relation is usually that SNR improves
-with the square root of the sampling set size. Somewhat lower than expected SNR exists for n-radix intervals for lower n due to zero elements in the basis vectors.
+with the square root of the sampling set size. For a subset of transformations somewhat lower than expected SNR exist for n-radix intervals for lower n due to zero elements in the basis vectors.
 
 <h3>
     Derivation
@@ -30,6 +30,9 @@ The result of straightforward arithmetics on expected value and variance.
         --><div style="height: 49px;" class="bar"></div><!--
         --><div style="height: 278px;" class="bar"></div>
 </div>
+
+<hr>
+
 <div style="display: none;">
     <div>
         <hr>
@@ -38,22 +41,25 @@ The result of straightforward arithmetics on expected value and variance.
     <svg id="visualisation" width="1000" height="500"></svg>
 </div>
 
+<hr>
+
 <div style="display: none;">
     <div>
         <hr>
-        <span>D3/Chart SVG</span>
+        <span>2D ll Canvas</span>
     </div>
-    <canvas id="chCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
+    <canvas id="chCanvas" width="1024" height="1024" style="border:1px solid #000000;"></canvas>
 </div>
+
+<hr>
 
 <div>
     <div>
         <hr>
         <span style="display: block;">D3/Simple Chart DIV</span>
     </div>
-    <div id="d3SimpleCanvas" width="1000" height="1000" style="border:1px solid #000000;"></div>
+    <div id="d3SimpleCanvas "style=" width=1024px; height=1024px; border:1px solid #000000;"></div>
 </div>
-
 
 <hr>
 
@@ -138,6 +144,7 @@ The result of straightforward arithmetics on expected value and variance.
 
 <script>
   var myLab = new SampSzLab();
+  myLab.plotDOMid = "chCanvas";
 
 /*  function draw() {
       var ctx = (a canvas context);
@@ -176,6 +183,7 @@ The result of straightforward arithmetics on expected value and variance.
         ]
   };
 
+// d3 remnants
   var chOptions = {
     // Boolean - Whether to animate the chart
     animation: false,
@@ -221,128 +229,13 @@ The result of straightforward arithmetics on expected value and variance.
 }
 
   var chCtx = document.getElementById('chCanvas').getContext("2d");
-//  var chChart = new Chart(chCtx).Bar(chData, chOptions);
-
-/*
-  //Google charts
-      google.load("visualization", "1.1", {packages:["bar"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Bin', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
-          ['16', 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200],
-          ['17', 1170, 460, 0, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200],
-          ['61', 660, 1120, -300, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200],
-          ['64', 1030, -540, 350, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200, 1000, -400, 200]
-        ]);
-
-        var options = {
-          chart: {
-            title: 'Noise',
-            subtitle: 'Noise with different sample sets',
-          },
-          bars: 'vertical' // Required for Material Bar Charts.
-        };
-
-        var chart = new google.charts.Bar(document.getElementById('barchart_material'));
-
-        chart.draw(data, options);
-      }
-*/
 
 
-// D3 grouped charts
-/*
-//var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, d)}; });
-var chD3V = cosV.map(function(d, i) { return {x: i, y: Math.max(0, 0.5)}; });
-
-var n = 4, // number of layers
-    m = myLab.sampSz, // number of samples per layer
-    stack = d3.layout.stack(),
-//      layers = stack(d3.range(n).map(function() { return bumpLayer(m, .1); })),
-    layers = stack(chD3V),
-    yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
-    yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
-
-var margin = {top: 40, right: 10, bottom: 20, left: 10},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-var x = d3.scale.ordinal()
-    .domain(d3.range(m))
-    .rangeRoundBands([0, width], .08);
-
-var y = d3.scale.linear()
-    .domain([0, yStackMax])
-    .range([height, 0]);
-
-var color = d3.scale.linear()
-    .domain([0, n - 1])
-    .range(["#aad", "#556"]);
-
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .tickSize(0)
-    .tickPadding(6)
-    .orient("bottom");
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-var layer = svg.selectAll(".layer")
-    .data(layers)
-  .enter().append("g")
-    .attr("class", "layer")
-    .style("fill", function(d, i) { return color(i); });
-
-var rect = layer.selectAll("rect")
-    .data(function(d) { return d; })
-  .enter().append("rect")
-    .attr("x", function(d) { return x(d.x); })
-    .attr("y", height)
-    .attr("width", x.rangeBand())
-    .attr("height", 0);
-
-rect.transition()
-    .delay(function(d, i) { return i * 10; })
-    .attr("y", function(d) { return y(d.y0 + d.y); })
-    .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
-
-svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
-*/
-
-// Simple D3
-
-//var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
-//                11, 12, 15, 20, 18, 17, 16, 18, 23, 55 ];
-
-var dataset = cosV.map(function(d, i) {
-        return d*d;
+  var dataset = cosV.map(function(d, i) {
+      return d*d;
     }
-);
+  );
 
-/*
-d3.select("body").selectAll("d3SimpleCanvas")
-    .data(dataset)
-    .enter()
-    .append("div")
-    .attr("class", "barSimp")
-    .style("height", function(d) {
-        var barHeight = Math.round(d * 5000);
-        return barHeight + "px";
-    })
-    */
-
-/*    .style("width", function(d) {
-        return "auto";
-        return 100/myLab.sampSz + "%";
-    })*/;
 
 
 </script>

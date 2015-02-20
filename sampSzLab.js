@@ -197,6 +197,54 @@ var SampSzLab = function(defaults) {
       return Math.sqrt((this.dotProduct(null, null, 1))[0]);
     }
 
+    //Plot the data in a 2D Canvas, (G, X, Y) mapped to (R, G, B)
+    this.plot2D = function(arr3) {
+      var c = document.getElementById(szThis.plotDOMid);
+      var ctx = c.getContext("2d");
+      var imgData = ctx.getImageData(0, 0, c.width, c.height);
+      var j = 0; // Image pixel color index
+      for (var i = 0; i < arr3[szThis.RGBbuffer].length; i += 3) {
+        imgData.data[j++] = (szThis.extremesRGB.rMax === szThis.extremesRGB.rMin) ? 0 : 255 * (arr3[szThis.GXYbuffer][i]     - szThis.extremesRGB.rMin) / (szThis.extremesRGB.rMax - szThis.extremesRGB.rMin);
+        imgData.data[j++] = (szThis.extremesRGB.gMax === szThis.extremesRGB.gMin) ? 0 : 255 * (arr3[szThis.GXYbuffer][i + 1] - szThis.extremesRGB.gMin) / (szThis.extremesRGB.gMax - szThis.extremesRGB.gMin);
+        imgData.data[j++] = (szThis.extremesRGB.bMax === szThis.extremesRGB.bMin) ? 0 : 255 * (arr3[szThis.GXYbuffer][i + 2] - szThis.extremesRGB.bMin) / (szThis.extremesRGB.bMax - szThis.extremesRGB.bMin);
+        imgData.data[j++] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      
+      this.calcStepIterationDOM.innerHTML = this.iteration;
+      this.calcStepDurationDOM.innerHTML = this.calcStepDuration;
+    };
+
+    this.plotN2D(command) {
+      var sideLength = 1024, i, j, pixs = 3 * sideLength * sideLength;
+      var rndPair = [];
+      var plot2Darr = Array(pixs);
+      szThis.extremesRGB = {};
+      szThis.extremesRGB.rMax = 255;
+      szThis.extremesRGB.gMax = 255;
+      szThis.extremesRGB.bMax = 255;
+
+      if (defaults && defaults.start) {
+        this.draw = function() {
+          while  (i < pixs) {
+            rndPDair = szThis.rndBMt();
+            plot2Darr[i++] = rndPair[0];
+            plot2Darr[i++] = rndPair[1];
+          }
+          szThis.plot2D(plot2Darr);
+        };
+        szThis.nextPlotEvent = requestAnimationFrame(function() {
+          this.
+        });
+      };
+      if (defaults && defaults.stop) {
+        cancelAnimationFrame(szThis.nextPlotEvent);
+      }
+
+
+
+    }
+
     /** The test object can be used as unit testing and as a way to evaluate the
      *  functions on various platforms, settings and biases.
      */
