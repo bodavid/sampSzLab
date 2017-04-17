@@ -156,7 +156,7 @@ var SampSzLab = function(defaults) {
      }
 
     /** The dotProduct between two functions can be used as a way to evaluate the orthogonality of two
-    *  functions. Trapeziod ( mid interval 0.5 ).
+    *  functions. Trapezoid ( mid interval 0.5 ).
     */
     this.dotProduct = function(comparefunc) {
 
